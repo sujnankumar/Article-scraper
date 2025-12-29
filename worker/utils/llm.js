@@ -19,24 +19,27 @@ const enrichArticle = async (originalArticle, references) => {
         ).join('\n\n');
 
         const prompt = `
-            You are a professional content editor. I want you to update and improve an existing article based on two high-ranking reference articles found on Google.
+            You are an expert SEO Content Strategist and Editor. Your goal is to take an original article and rewrite it using insights from two top-performing competitor articles discovered via Google Search.
 
             Original Title: ${originalArticle.title}
             Original Content: ${originalArticle.content}
 
             ---
-            Reference Articles Content:
-            ${referenceContext}
+            Competitor Reference 1 [Source: ${references[0]?.url}]:
+            ${references[0]?.content.substring(0, 2500)}
+            ---
+            Competitor Reference 2 [Source: ${references[1]?.url}]:
+            ${references[1]?.content.substring(0, 2500)}
             ---
 
-            Task:
-            1. Rewrite the original article to make it more professional, well-formatted, and informative.
-            2. Match the style, depth, and formatting quality of the top-ranking reference articles.
-            3. Ensure the content is unique and not just a direct copy.
-            4. **CRITICAL**: At the bottom of the article, add a "References" section citing the sources provided in the reference context.
-            5. Return the updated article content in a clean format (use Markdown for headers and lists).
+            INSTRUCTIONS:
+            1. **SEO Optimization**: Improve the keyword density, headings structure (H1, H2, H3), and overall readability.
+            2. **Format**: Use rich Markdown formatting. Include a clear introduction, structured body with descriptive subheadings, and a concise conclusion.
+            3. **Style**: Match the authoritative and professional tone of the competitor articles while keeping the content unique.
+            4. **Enrichment**: Incorporate valuable points or perspectives found in the competitor articles that were missing from the original.
+            5. **Citations**: At the very end of the article, under a horizontal rule (---), add a section titled "## References". List the two competitor URLs provided above as clickable links.
 
-            Updated Article:
+            REWRITTEN SEO-OPTIMIZED ARTICLE:
         `;
 
         const response = await openai.chat.completions.create({
