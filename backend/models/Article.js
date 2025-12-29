@@ -11,9 +11,13 @@ const ArticleSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    content: {
+    originalContent: {
         type: String,
-        required: [true, 'Please add content']
+        required: [true, 'Please add original content']
+    },
+    updatedContent: {
+        type: String,
+        default: ''
     },
     sourceUrl: {
         type: String,

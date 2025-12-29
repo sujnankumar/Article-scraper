@@ -44,13 +44,16 @@ const main = async () => {
 
         // 3. LLM Logic
         if (references.length > 0) {
-            const enrichedContent = await enrichArticle(article, references);
+            const enrichedContent = await enrichArticle({
+                title: article.title,
+                content: article.originalContent
+            }, references);
 
             // 4. Publish back to backend
             console.log(`Publishing updated article: ${article.title}`);
             try {
                 await axios.put(`${BACKEND_URL}/articles/${article._id}`, {
-                    content: enrichedContent,
+                    updatedContent: enrichedContent,
                     isUpdated: true
                 });
                 console.log(`Successfully updated: ${article.title}`);

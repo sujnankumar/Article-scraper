@@ -65,7 +65,7 @@ const scrapeArticles = async () => {
             detailedArticles.push({
                 title: art.title,
                 slug: slugify(art.title, { lower: true, strict: true }),
-                content: content || 'No content found',
+                originalContent: content || 'No content found',
                 sourceUrl: art.link,
                 isUpdated: false
             });

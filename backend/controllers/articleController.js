@@ -86,7 +86,15 @@ exports.scrapeAndStore = async (req, res) => {
             // Avoid duplicates based on sourceUrl
             let exists = await Article.findOne({ sourceUrl: art.sourceUrl });
             if (!exists) {
-                const newArt = await Article.create(art);
+                // Transform the scraped 'content' into 'originalContent' and 'updatedContent'
+                const newArtData = {
+                    title: art.title,
+                    sourceUrl: art.sourceUrl,
+                    originalContent: art.content, // Assuming 'art' has a 'content' field
+                    updatedContent: art.content,  // Initially, updatedContent is the same as original
+                    // Add other fields from 'art' if necessary, e.g., author, imageUrl
+                };
+                const newArt = await Article.create(newArtData);
                 storedArticles.push(newArt);
             } else {
                 storedArticles.push(exists);
