@@ -19,6 +19,9 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/articles', require('./routes/articleRoutes'));
 
+const errorHandler = require('./middleware/error');
+app.use(errorHandler);
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
