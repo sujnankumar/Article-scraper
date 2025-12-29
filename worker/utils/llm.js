@@ -48,7 +48,15 @@ const enrichArticle = async (originalArticle, references) => {
             temperature: 0.7
         });
 
-        return response.choices[0].message.content.trim();
+        let enrichedContent = response.choices[0].message.content.trim();
+
+        // Safeguard: Ensure References section exists
+        if (!enrichedContent.includes('## References')) {
+            const referencesList = references.map(ref => `- [${ref.url}](${ref.url})`).join('\n');
+            enrichedContent += `\n\n---\n## References\n${referencesList}`;
+        }
+
+        return enrichedContent;
     } catch (error) {
         console.error('Error enriching article with LLM:', error.message);
         return originalArticle.content; // Fallback to original
