@@ -90,9 +90,9 @@ exports.scrapeAndStore = async (req, res) => {
                 const newArtData = {
                     title: art.title,
                     sourceUrl: art.sourceUrl,
-                    originalContent: art.content, // Assuming 'art' has a 'content' field
-                    updatedContent: art.content,  // Initially, updatedContent is the same as original
-                    // Add other fields from 'art' if necessary, e.g., author, imageUrl
+                    originalContent: art.originalContent,
+                    updatedContent: art.originalContent, // Initially, updatedContent is the same as original
+                    slug: art.slug
                 };
                 const newArt = await Article.create(newArtData);
                 storedArticles.push(newArt);

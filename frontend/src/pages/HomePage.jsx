@@ -31,7 +31,10 @@ const HomePage = () => {
     <div className="home-page">
       <header className="page-header">
         <h1>Article Dashboard</h1>
-        <p>Original and AI-Enriched Articles from BeyondChats</p>
+        <p>Enhancing BeyondChats Content with AI Intelligence</p>
+        <button className="refresh-btn" onClick={loadArticles}>
+          Refresh Articles
+        </button>
       </header>
 
       <div className="article-grid">
@@ -40,7 +43,10 @@ const HomePage = () => {
             <ArticleCard key={article._id} article={article} />
           ))
         ) : (
-          <div className="no-data">No articles found in the database.</div>
+          <div className="no-data">
+            <p>No articles found in the database.</p>
+            <button className="view-btn" onClick={loadArticles}>Check Again</button>
+          </div>
         )}
       </div>
     </div>
