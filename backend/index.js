@@ -16,6 +16,9 @@ app.get('/', (req, res) => {
     res.send('BeyondChats Backend API is running...');
 });
 
+// Routes
+app.use('/api/articles', require('./routes/articleRoutes'));
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
