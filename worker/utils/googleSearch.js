@@ -23,21 +23,39 @@ const searchGoogle = async (query) => {
         const $ = cheerio.load(data);
         const links = [];
 
-        // Google search results are typically in 'a' tags inside 'div.g' (for desktop)
-        // or just 'a' tags with specific patterns.
-        $('a').each((i, el) => {
-            const href = $(el).attr('href');
-            if (href && href.startsWith('http') && !href.includes('google.com')) {
-                // Filter out some common non-article sites if needed, or just take the first two
-                links.push(href);
+        // Google search results typically have titles in h3 tags inside 'a' tags
+        $('div.g').each((i, el) => {
+            const link = $(el).find('a').attr('href');
+            if (link && link.startsWith('http')) {
+                // Heuristic to filter for blog/article-like URLs
+                const isArticle = !link.includes('google.com') &&
+                    !link.includes('youtube.com') &&
+                    !link.includes('facebook.com') &&
+                    !link.includes('twitter.com') &&
+                    !link.includes('linkedin.com');
+
+                if (isArticle) {
+                    links.push(link);
+                }
             }
+            if (links.length >= 2) return false; // Break loop
         });
 
-        // Filter and get top 2
-        const articleLinks = links.slice(0, 2);
-        console.log(`Found ${articleLinks.length} suitable links.`);
+        // Fallback for different HTML structures
+        if (links.length < 2) {
+            $('a h3').each((i, el) => {
+                const link = $(el).parent().attr('href');
+                if (link && link.startsWith('http') && !link.includes('google.com')) {
+                    if (!links.includes(link)) {
+                        links.push(link);
+                    }
+                }
+                if (links.length >= 2) return false;
+            });
+        }
 
-        return articleLinks;
+        console.log(`Found ${links.length} suitable links.`);
+        return links.slice(0, 2);
     } catch (error) {
         console.error('Error during Google search:', error.message);
         return [];
