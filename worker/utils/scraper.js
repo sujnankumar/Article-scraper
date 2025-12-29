@@ -18,40 +18,76 @@ const scrapeContent = async (url) => {
 
         const $ = cheerio.load(data);
 
-        // Remove scripts, styles, and other noise
-        $('script, style, nav, footer, header, noscript').remove();
+        // Define elements to remove (Noise)
+        const noiseSelectors = [
+            'script', 'style', 'nav', 'footer', 'header', 'noscript',
+            'aside', '.sidebar', '#sidebar', '.ads', '.ad-container',
+            '.social-share', '.related-posts', '.comments', '.newsletter-signup',
+            '.menu', '.pagination', '.widget', 'iframe', 'button', 'form'
+        ];
 
-        // Common article content selectors
+        // Process noise removal
+        noiseSelectors.forEach(selector => $(selector).remove());
+
+        // Common article content selectors ordered by specificity
         const selectors = [
             'article',
+            '[role="main"]',
             '.post-content',
             '.entry-content',
-            '.article-content',
+            '.article-body',
+            '.content-area',
             '.main-content',
-            'main'
+            'main',
+            '.elementor-widget-theme-post-content' // Added specifically for BeyondChats-like structures
         ];
 
         let content = '';
+        let bestElement = null;
+
         for (const selector of selectors) {
             const el = $(selector);
             if (el.length > 0) {
-                // Heuristic: take the one with most text
-                const text = el.text().trim();
-                if (text.length > content.length) {
-                    content = text;
-                }
+                // Heuristic: take the one with most paragraphs or longest text
+                el.each((i, subEl) => {
+                    const text = $(subEl).text().trim();
+                    if (text.length > content.length) {
+                        content = text;
+                        bestElement = $(subEl);
+                    }
+                });
             }
         }
 
-        // Fallback to body text if no specific selector works well
+        // If specific containers didn't yield much, try to find the container with most paragraphs
         if (content.length < 500) {
-            content = $('body').text().trim().replace(/\s+/g, ' ');
+            let maxPText = '';
+            $('div, section').each((i, el) => {
+                const pText = $(el).find('p').text().trim();
+                if (pText.length > maxPText.length) {
+                    maxPText = pText;
+                }
+            });
+            if (maxPText.length > content.length) {
+                content = maxPText;
+            }
         }
 
-        // Limit content length to avoid overloading LLM
-        return content.substring(0, 5000);
+        // Fallback to body text if still very short
+        if (content.length < 200) {
+            content = $('body').text().trim();
+        }
+
+        // Clean up the text: remove excessive whitespace and preserve some structure
+        const cleanedContent = content
+            .replace(/\s\s+/g, ' ')  // Collapse multiple spaces
+            .replace(/\n\s*\n/g, '\n\n') // Normalize multiple newlines
+            .trim();
+
+        // Limit content length to avoid overloading LLM contexts
+        return cleanedContent.substring(0, 8000);
     } catch (error) {
-        console.error(`Error scraping ${url}:`, error.message);
+        console.error(`Error scraping ${url}: ${error.message}`);
         return '';
     }
 };
