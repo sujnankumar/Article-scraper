@@ -17,3 +17,8 @@ export const triggerScraper = async () => {
     const response = await axios.post('http://localhost:5000/api/process');
     return response.data;
 };
+
+export const scrapeNewArticles = async () => {
+    const response = await axios.post(`${API_URL}/scrape`);
+    return response.data;
+};

@@ -7,12 +7,14 @@ import {
   BarChart2, 
   Settings, 
   ChevronLeft, 
-  ChevronRight 
+  ChevronRight,
+  Download 
 } from 'lucide-react';
-import { triggerScraper } from '../services/articleService';
+import { triggerScraper, scrapeNewArticles } from '../services/articleService';
 
 const Sidebar = () => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isScraping, setIsScraping] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handleRunScraper = async () => {
@@ -25,6 +27,20 @@ const Sidebar = () => {
       alert('Failed to start processing.');
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleFetchArticles = async () => {
+    try {
+      setIsScraping(true);
+      const result = await scrapeNewArticles();
+      const count = result.count || 0;
+      alert(`Fetched ${count} new articles! Refresh the dashboard.`);
+    } catch (error) {
+      console.error(error);
+      alert('Failed to fetch articles.');
+    } finally {
+      setIsScraping(false);
     }
   };
 
@@ -75,6 +91,17 @@ const Sidebar = () => {
           >
             <RefreshCw size={18} className={isProcessing ? 'spin' : ''} />
             {!isCollapsed && <span>{isProcessing ? 'Processing...' : 'Run AI Worker'}</span>}
+          </button>
+
+          <button 
+            className={`control-btn secondary ${isCollapsed ? 'icon-only' : ''}`} 
+            onClick={handleFetchArticles}
+            disabled={isScraping}
+            style={{ marginTop: '10px' }}
+            title={isCollapsed ? "Fetch New Articles" : ""}
+          >
+            <Download size={18} className={isScraping ? 'bounce' : ''} />
+            {!isCollapsed && <span>{isScraping ? 'Fetching...' : 'Fetch New Articles'}</span>}
           </button>
         </div>
       </div>

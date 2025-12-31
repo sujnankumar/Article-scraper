@@ -1,5 +1,5 @@
 const Article = require('../models/Article');
-const scrapeArticles = require('../utils/scraper');
+const crawlBlog = require('../utils/blogCrawler');
 
 // @desc    Get all articles
 // @route   GET /api/articles
@@ -79,7 +79,9 @@ exports.deleteArticle = async (req, res) => {
 // @access  Public
 exports.scrapeAndStore = async (req, res) => {
     try {
-        const articles = await scrapeArticles();
+        console.log("Starting scrapeAndStore (using crawlBlog)...");
+        const articles = await crawlBlog();
+        console.log(`Crawled ${articles.length} articles.`);
 
         const storedArticles = [];
         for (const art of articles) {
@@ -96,7 +98,9 @@ exports.scrapeAndStore = async (req, res) => {
                 };
                 const newArt = await Article.create(newArtData);
                 storedArticles.push(newArt);
+                console.log(`Stored new article: ${art.title}`);
             } else {
+                console.log(`Article already exists: ${art.title}`);
                 storedArticles.push(exists);
             }
         }
@@ -107,6 +111,7 @@ exports.scrapeAndStore = async (req, res) => {
             data: storedArticles
         });
     } catch (error) {
+        console.error("Error in scrapeAndStore:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 };

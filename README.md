@@ -1,125 +1,84 @@
-# Article Processing Platform (Monorepo)
+# BeyondChats Article Intelligence Platform
 
-A powerful full-stack system that scrapes articles from a source, uses Google Search and LLMs to enrich the content with SEO-optimized formatting and citations, and displays the result in a modern dashboard.
-
----
+This project is a full-stack automated content enhancement system. It crawls articles from the BeyondChats blog, researches related competitor content using DuckDuckGo, and uses Google Gemini 1.5 to rewrite and enrich the articles for better SEO and readability.
 
 ## 🏗 Architecture
 
-The project follows a modular service-oriented architecture:
+The system operates as a Monorepo with two main services:
 
-```mermaid
-graph TD
-    subgraph "Frontend (React + Vite)"
-        UI[Dashboard UI]
-        Service[Article Service]
-    end
+1.  **Frontend (React + Vite)**
+    *   **Dashboard**: Displays original vs. AI-enhanced content side-by-side.
+    *   **Controls**: Provides UI triggers for scraping new articles and running the AI pipeline.
+    *   **Tech**: React Router, Axios, Lucide Icons, Modern CSS Variables (Dark Theme).
 
-    subgraph "Backend (Node.js + Express)"
-        API[CRUD APIs]
-        Scraper[Initial Scraper]
-        DB[(MongoDB)]
-    end
-
-    subgraph "Worker (Node.js)"
-        Processor[Processing Loop]
-        Search[Google Search Utility]
-        ExtScraper[External Scraper]
-        LLM[OpenAI Integration]
-    end
-
-    Scraper -->|Stores| DB
-    API <-->|Reads/Writes| DB
-    Service -->|Fetches| API
-    UI <--> Service
-    
-    Processor -->|Polls Pending| API
-    Processor -->|Searches| Search
-    Processor -->|Scrapes Competitors| ExtScraper
-    Processor -->|Enriches Content| LLM
-    Processor -->|Publishes Updated| API
-```
+2.  **Backend (Node.js + Express)**
+    *   **API Layer**: Handles CRUD operations and exposes endpoints for frontend triggers.
+    *   **Scraper Engine**:
+        *   `blogCrawler.js`: Fetches latest articles from BeyondChats.com.
+        *   `scraper.js`: Scrapes full text from competitor URLs (searched via DuckDuckGo).
+    *   **AI Engine**: Integrates `@google/generative-ai` to process content.
+    *   **Database**: MongoDB (Mongoose) stores article metadata, original content, and enhanced versions.
 
 ---
 
-## 🔄 Data Flow
-
-1.  **Ingestion**: The **Backend Scraper** fetches the 5 oldest blog posts from `BeyondChats.com` and stores them in **MongoDB** with `isUpdated: false`.
-2.  **Discovery**: The **Worker** polls the API for articles where `isUpdated` is `false`.
-3.  **Research**: For each article, the Worker searches Google for the title and extracts the top 2 relevant blog/article links.
-4.  **Extraction**: The Worker scrapes the main content from those external competitor links, removing noise (ads/nav).
-5.  **Enrichment**: The **LLM Utility** sends the original content + competitor content to OpenAI. It rewrites the article for better SEO, formatting, and appends a **References** section with citations.
-6.  **Publication**: The Worker sends the enriched content back to the Backend, setting `isUpdated: true`.
-7.  **Presentation**: The **React Frontend** fetches all articles and allows users to toggle between the **Original** and **AI-Enhanced** versions.
-
----
-
-## 🚀 Setup & Installation
+## 🚀 Setup Instructions
 
 ### 1. Prerequisites
-- **Node.js**: v16+ 
-- **MongoDB**: Local or Atlas connection string.
-- **OpenAI API Key**: Required for the enrichment phase.
+*   Node.js (v18+)
+*   MongoDB (Running locally on default port 27017)
+*   Google Gemini API Key
 
-### 2. Environment Configuration
-
-Create a `.env` file in each directory:
-
-#### **backend/.env**
-```env
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/beyondchats
-NODE_ENV=development
-```
-
-#### **worker/.env**
-```env
-BACKEND_URL=http://localhost:5000/api
-GEMINI_API_KEY=your_gemini_api_key_here
-```
-
-### 3. Running the Application
-
-Open three terminals:
-
-**Terminal 1: Backend**
+### 2. Backend Setup
+Navigate to the backend directory and install dependencies:
 ```bash
 cd backend
 npm install
+```
+
+Create a `.env` file in `backend/`:
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/beyondchats
+GEMINI_API_KEY=your_actual_api_key_here
+```
+
+Start the server:
+```bash
 npm run dev
 ```
 
-**Terminal 2: Worker**
-```bash
-cd worker
-npm install
-node index.js
-```
-
-**Terminal 3: Frontend**
+### 3. Frontend Setup
+Navigate to the frontend directory:
 ```bash
 cd frontend
 npm install
-npm run dev
 ```
 
----
-
-## 🛠 Tech Stack
-
-- **Frontend**: React, Vite, Axios, Lucide React (Icons)
-- **Backend**: Node.js, Express, MongoDB, Mongoose, Cheerio (Scraping)
-- **Worker**: Node.js, OpenAI SDK, Cheerio, Axios
-- **Monorepo Management**: Folder-based separation
+Start the development server:
+```bash
+npm run dev
+```
+Access the application at `http://localhost:5173` (or port 3000).
 
 ---
 
-## 📝 API Endpoints
+## 🔄 Workflow
 
-| Method | Endpoint | Description |
+1.  **Fetch Articles**: Click **"Fetch New Articles"** in the sidebar. The backend crawls `beyondchats.com/blog/` and saves the top 5 most recent posts to MongoDB.
+2.  **Pipeline Analysis**: Click **"Run AI Worker"**.
+    *   The system identifies pending articles.
+    *   Searches DuckDuckGo for the article title.
+    *   Scrapes content from the top 2 competitor results.
+    *   Sends all context to Gemini 1.5 Flash.
+3.  **Review**: The AI-generated content is saved. View it on the dashboard by clicking "View Details" on any article.
+
+---
+
+## 🛠 API Reference
+
+| Endpoint | Method | Function |
 | :--- | :--- | :--- |
-| `GET` | `/api/articles` | Get all articles (supports `?isUpdated=true/false` filtering) |
-| `GET` | `/api/articles/:id` | Get details for a specific article |
-| `POST` | `/api/articles/scrape` | Trigger manual scraping of source blog |
-| `PUT` | `/api/articles/:id` | Update article content/status |
-| `DELETE` | `/api/articles/:id` | Remove an article |
+| `/api/articles` | GET | List all articles. |
+| `/api/articles/scrape` | POST | Trigger blog crawler (fetches 5 new posts). |
+| `/api/process` | POST | Trigger AI enrichment pipeline (background task). |
+| `/api/articles/:id` | GET | Get single article details. |
