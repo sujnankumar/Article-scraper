@@ -6,19 +6,29 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { triggerScraper, scrapeNewArticles } from '../services/articleService';
+import Modal from '../components/Modal';
 
 const SettingsPage = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [isScraping, setIsScraping] = useState(false);
+    
+    // Modal state
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalData, setModalData] = useState({ title: '', message: '', type: 'success' });
+
+    const showModal = (title, message, type = 'success') => {
+        setModalData({ title, message, type });
+        setModalOpen(true);
+    };
 
     const handleRunScraper = async () => {
       try {
         setIsProcessing(true);
         await triggerScraper();
-        alert('AI Processing Started! Check the console/logs for progress.');
+        showModal('Processing Started', 'The AI Worker is now running in the background. Check your server logs for progress.', 'success');
       } catch (error) {
         console.error(error);
-        alert('Failed to start processing.');
+        showModal('Processing Failed', 'Could not start the AI worker. Please check if the backend is running.', 'error');
       } finally {
         setIsProcessing(false);
       }
@@ -29,10 +39,10 @@ const SettingsPage = () => {
         setIsScraping(true);
         const result = await scrapeNewArticles();
         const count = result.count || 0;
-        alert(`Fetched ${count} new articles! Refresh the dashboard.`);
+        showModal('Fetch Complete', `Successfully fetched ${count} articles from the source. Refresh the Articles page to see them.`, 'success');
       } catch (error) {
         console.error(error);
-        alert('Failed to fetch articles.');
+        showModal('Fetch Failed', 'Could not fetch new articles. Please verify the blog URL and try again.', 'error');
       } finally {
         setIsScraping(false);
       }
@@ -57,7 +67,7 @@ const SettingsPage = () => {
                 <div className="actions-grid">
                     <div className="action-card">
                         <h3>Fetch New Articles</h3>
-                        <p>Crawls BeyondChats blog for the latest headers.</p>
+                        <p>Crawls BeyondChats blog for the latest posts.</p>
                         <button 
                             className="settings-btn secondary"
                             onClick={handleFetchArticles} 
@@ -100,6 +110,14 @@ const SettingsPage = () => {
                     </div>
                 </div>
             </div>
+
+            <Modal 
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                title={modalData.title}
+                message={modalData.message}
+                type={modalData.type}
+            />
         </div>
     );
 };

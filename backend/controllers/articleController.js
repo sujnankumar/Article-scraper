@@ -83,8 +83,12 @@ exports.getArticleStats = async (req, res) => {
         const enhanced = await Article.countDocuments({ isUpdated: true });
         const pending = total - enhanced;
 
-        const lastUpdatedArticle = await Article.findOne().sort({ updatedAt: -1 });
-        const lastUpdated = lastUpdatedArticle ? lastUpdatedArticle.updatedAt : null;
+        // Try to get the most recently modified article
+        // Fall back to createdAt if updatedAt doesn't exist
+        const lastUpdatedArticle = await Article.findOne().sort({ updatedAt: -1, createdAt: -1 });
+        const lastUpdated = lastUpdatedArticle
+            ? (lastUpdatedArticle.updatedAt || lastUpdatedArticle.createdAt)
+            : null;
 
         res.status(200).json({
             success: true,

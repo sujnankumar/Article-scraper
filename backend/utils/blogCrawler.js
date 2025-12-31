@@ -8,7 +8,7 @@ const scrapeContent = require('./scraper');
  */
 const crawlBlog = async () => {
     try {
-        const BLOG_URL = 'https://beyondchats.com/blog/';
+        const BLOG_URL = 'https://beyondchats.com/blogs/';
         console.log(`Crawling ${BLOG_URL}...`);
 
         const { data } = await axios.get(BLOG_URL, {
