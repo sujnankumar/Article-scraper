@@ -82,7 +82,7 @@ VITE_API_URL=http://localhost:5000
 npm run dev
 ```
 
-Access the application at `http://localhost:5173`
+Access the application at `http://localhost:3000`
 
 ---
 
@@ -181,24 +181,6 @@ GOOGLE_SEARCH_ENGINE_ID=<your-search-engine-id>
 ```env
 VITE_API_URL=http://localhost:5000
 ```
-
-For production deployment on Vercel, set `VITE_API_URL` to your backend URL.
-
----
-
-## 🚀 Deployment
-
-### Backend (Render)
-1. Push code to GitHub
-2. Create new Web Service on Render
-3. Set environment variables in Render dashboard
-4. Deploy from repository
-
-### Frontend (Vercel)
-1. Push code to GitHub
-2. Import project to Vercel
-3. Set `VITE_API_URL` environment variable to production backend URL
-4. Deploy automatically on push
 
 ---
 
