@@ -74,6 +74,32 @@ exports.deleteArticle = async (req, res) => {
     }
 };
 
+// @desc    Get article statistics
+// @route   GET /api/articles/stats
+// @access  Public
+exports.getArticleStats = async (req, res) => {
+    try {
+        const total = await Article.countDocuments();
+        const enhanced = await Article.countDocuments({ isUpdated: true });
+        const pending = total - enhanced;
+
+        const lastUpdatedArticle = await Article.findOne().sort({ updatedAt: -1 });
+        const lastUpdated = lastUpdatedArticle ? lastUpdatedArticle.updatedAt : null;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                total,
+                enhanced,
+                pending,
+                lastUpdated
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
 // @desc    Scrape and store articles
 // @route   POST /api/articles/scrape
 // @access  Public

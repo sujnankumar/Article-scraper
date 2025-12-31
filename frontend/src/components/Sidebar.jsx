@@ -3,46 +3,14 @@ import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Zap, 
-  RefreshCw, 
   BarChart2, 
   Settings, 
   ChevronLeft, 
-  ChevronRight,
-  Download 
+  ChevronRight 
 } from 'lucide-react';
-import { triggerScraper, scrapeNewArticles } from '../services/articleService';
 
 const Sidebar = () => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isScraping, setIsScraping] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  const handleRunScraper = async () => {
-    try {
-      setIsProcessing(true);
-      await triggerScraper();
-      alert('AI Processing Started! Check the console/logs for progress.');
-    } catch (error) {
-      console.error(error);
-      alert('Failed to start processing.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleFetchArticles = async () => {
-    try {
-      setIsScraping(true);
-      const result = await scrapeNewArticles();
-      const count = result.count || 0;
-      alert(`Fetched ${count} new articles! Refresh the dashboard.`);
-    } catch (error) {
-      console.error(error);
-      alert('Failed to fetch articles.');
-    } finally {
-      setIsScraping(false);
-    }
-  };
 
   return (
     <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
@@ -80,30 +48,9 @@ const Sidebar = () => {
         </NavLink>
       </nav>
 
+      {/* Footer can be used for version or account info later */}
       <div className="sidebar-footer">
-        <div className="control-panel">
-          {!isCollapsed && <h3>Controls</h3>}
-          <button 
-            className={`control-btn primary ${isCollapsed ? 'icon-only' : ''}`} 
-            onClick={handleRunScraper}
-            disabled={isProcessing}
-            title={isCollapsed ? "Run AI Worker" : ""}
-          >
-            <RefreshCw size={18} className={isProcessing ? 'spin' : ''} />
-            {!isCollapsed && <span>{isProcessing ? 'Processing...' : 'Run AI Worker'}</span>}
-          </button>
-
-          <button 
-            className={`control-btn secondary ${isCollapsed ? 'icon-only' : ''}`} 
-            onClick={handleFetchArticles}
-            disabled={isScraping}
-            style={{ marginTop: '10px' }}
-            title={isCollapsed ? "Fetch New Articles" : ""}
-          >
-            <Download size={18} className={isScraping ? 'bounce' : ''} />
-            {!isCollapsed && <span>{isScraping ? 'Fetching...' : 'Fetch New Articles'}</span>}
-          </button>
-        </div>
+        {!isCollapsed && <p className="version-text">By Sujnan Kumar</p>}
       </div>
     </div>
   );

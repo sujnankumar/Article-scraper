@@ -6,13 +6,15 @@ const {
     createArticle,
     updateArticle,
     deleteArticle,
-    scrapeAndStore
+    scrapeAndStore,
+    getArticleStats
 } = require('../controllers/articleController');
 
 router.route('/')
     .get(getArticles)
     .post(createArticle);
 
+router.get('/stats', getArticleStats);
 router.post('/scrape', scrapeAndStore);
 
 router.route('/:id')

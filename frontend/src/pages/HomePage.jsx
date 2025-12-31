@@ -30,8 +30,8 @@ const HomePage = () => {
   return (
     <div className="home-page">
       <header className="page-header">
-        <h1>Article Dashboard</h1>
-        <p>Enhancing BeyondChats Content with AI Intelligence</p>
+        <h1>Articles</h1>
+        <p>Manage and enhance your content with AI Intelligence</p>
         <button className="refresh-btn" onClick={loadArticles}>
           Refresh Articles
         </button>
