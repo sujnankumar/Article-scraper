@@ -28,7 +28,7 @@ A full-stack automated content enhancement system that fetches articles from the
 - **Search Engine**: 
   - `googleSearch.js`: Uses Google Custom Search API to find competitor articles
 - **AI Engine**: 
-  - `llm.js`: Integrates Google Gemini 1.5 Flash for content enhancement
+  - `llm.js`: Integrates Google Gemini 3 Flash Preview for content enhancement
   - Validates output before marking as enhanced
 - **Database**: MongoDB (Mongoose) with automatic timestamps
 
