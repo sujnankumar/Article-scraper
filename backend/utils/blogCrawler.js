@@ -28,7 +28,7 @@ const crawlBlog = async () => {
             const title = $(el).text().trim();
 
             // Basic filtering for valid article links
-            if (href && href.includes('/blog/') && href !== BLOG_URL && title.length > 10) {
+            if (href && href.includes('/blogs/') && href !== BLOG_URL && title.length > 10) {
                 if (!articleLinks.some(a => a.url === href)) {
                     articleLinks.push({ url: href, title });
                 }
