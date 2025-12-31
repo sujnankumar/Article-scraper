@@ -30,16 +30,18 @@ const ArticleCard = ({ article }) => {
 
   return (
     <>
-      <div className="article-card">
+      <div className={`article-card ${!article.isUpdated ? 'not-enhanced' : ''}`}>
         <div className="card-header">
           <div className="badge-group">
-            {article.isUpdated && (
+            {article.isUpdated ? (
               <button 
                 className={`view-toggle ${viewMode === 'updated' ? 'active' : ''}`}
                 onClick={() => setViewMode('updated')}
               >
                 AI Enhanced
               </button>
+            ) : (
+              <span className="status-badge pending">Not Enhanced</span>
             )}
             <button 
               className={`view-toggle ${viewMode === 'original' || !article.isUpdated ? 'active' : ''}`}

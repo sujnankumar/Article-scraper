@@ -310,6 +310,29 @@ body {
   border-color: var(--accent-color);
 }
 
+.status-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.status-badge.pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.article-card.not-enhanced {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, var(--card-bg), rgba(245, 158, 11, 0.03));
+}
+
+.article-card.not-enhanced:hover {
+  border-color: #f59e0b;
+}
+
 .date-tag {
   font-size: 0.8rem;
   color: var(--text-secondary);
