@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { BarChart2, CheckCircle, Clock, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getArticleStats } from '../services/articleService';
 
 const AnalyticsPage = () => {
     const [stats, setStats] = useState(null);
@@ -10,7 +10,7 @@ const AnalyticsPage = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const { data } = await axios.get('http://localhost:5000/api/articles/stats');
+                const data = await getArticleStats();
                 setStats(data.data);
             } catch (error) {
                 console.error("Error fetching stats:", error);
