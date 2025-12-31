@@ -1,5 +1,12 @@
 # BeyondChats Article Intelligence Platform
 
+## Live Project Links
+
+Frontend: https://article-scraper-gules.vercel.app/  
+Backend API: https://article-scraper-mkid.onrender.com/ 
+
+Note: Backend may take a few seconds to wake up due to free-tier hosting.
+
 This project is a full-stack automated content enhancement system. It crawls articles from the BeyondChats blog, researches related competitor content using DuckDuckGo, and uses Google Gemini 1.5 to rewrite and enrich the articles for better SEO and readability.
 
 ## 🏗 Architecture
