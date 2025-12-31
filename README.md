@@ -75,7 +75,7 @@ NODE_ENV=development
 #### **worker/.env**
 ```env
 BACKEND_URL=http://localhost:5000/api
-OPENAI_API_KEY=your_openai_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ### 3. Running the Application

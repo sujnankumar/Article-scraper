@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import ArticleModal from './ArticleModal';
 
-const ArticleCard = ({ article }) => {
-  const [viewMode, setViewMode] = useState('updated'); // 'original' or 'updated'
-  const [showModal, setShowModal] = useState(false);
+const ArticleModal = ({ article, isOpen, onClose }) => {
+  const [viewMode, setViewMode] = useState(article.isUpdated ? 'updated' : 'original');
+
+  if (!isOpen) return null;
 
   // Helper to extract AI title from markdown if it exists
   const getProcessedContent = () => {
@@ -13,7 +13,6 @@ const ArticleCard = ({ article }) => {
     }
 
     const aiContent = article.updatedContent || "";
-    // Match first markdown header: # Title or ### Title
     const headerMatch = aiContent.match(/^(#+)\s+(.+)$/m);
     
     if (headerMatch) {
@@ -26,13 +25,22 @@ const ArticleCard = ({ article }) => {
   };
 
   const { title, content } = getProcessedContent();
-  const contentToShow = content;
 
   return (
-    <>
-      <div className="article-card">
-        <div className="card-header">
-          <div className="badge-group">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>&times;</button>
+        
+        <div className="modal-header">
+          <h2 className="modal-title">{title}</h2>
+          <div className="modal-meta">
+            <span className="modal-date">{new Date(article.createdAt).toLocaleDateString()}</span>
+            <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" className="modal-source-link">
+              Source Site
+            </a>
+          </div>
+          
+          <div className="modal-toggle-group">
             {article.isUpdated && (
               <button 
                 className={`view-toggle ${viewMode === 'updated' ? 'active' : ''}`}
@@ -48,40 +56,28 @@ const ArticleCard = ({ article }) => {
               Original
             </button>
           </div>
-          <span className="date-tag">
-            {new Date(article.createdAt).toLocaleDateString()}
-          </span>
         </div>
-        
-        <h3 className="article-title">{title}</h3>
-        
-        <div className="content-container">
-          <div className="article-excerpt">
+
+        <div className="modal-body">
+          <div className="full-content markdown-body">
             {viewMode === 'updated' && article.isUpdated ? (
-              <ReactMarkdown>
-                {contentToShow.substring(0, 200) + '...'}
-              </ReactMarkdown>
+              <ReactMarkdown>{content}</ReactMarkdown>
             ) : (
-              <p>{contentToShow.substring(0, 200)}...</p>
+              content.split('\n')
+                .filter(para => para.trim() !== '')
+                .map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))
             )}
           </div>
         </div>
 
-        <div className="card-footer">
-          <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" className="source-link">
-            Read Full Original
-          </a>
-          <button className="view-btn" onClick={() => setShowModal(true)}>View Details</button>
+        <div className="modal-footer">
+          <button className="secondary-btn" onClick={onClose}>Close</button>
         </div>
       </div>
-
-      <ArticleModal 
-        article={article} 
-        isOpen={showModal} 
-        onClose={() => setShowModal(false)} 
-      />
-    </>
+    </div>
   );
 };
 
-export default ArticleCard;
+export default ArticleModal;

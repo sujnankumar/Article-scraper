@@ -1,22 +1,17 @@
-const { OpenAI } = require('openai');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
 /**
- * Enriches an article using an LLM based on reference contents.
+ * Enriches an article using Google Gemini based on reference contents.
  * @param {Object} originalArticle - { title, content }
  * @param {Object[]} references - Array of { url, content }
  * @returns {Promise<string>} - The enriched article content in markdown/HTML
  */
 const enrichArticle = async (originalArticle, references) => {
     try {
-        console.log(`Enriching article: ${originalArticle.title}`);
-
-        const referenceContext = references.map((ref, i) =>
-            `Reference ${i + 1} [Source: ${ref.url}]:\n${ref.content.substring(0, 2000)}`
-        ).join('\n\n');
+        console.log(`Enriching article using Gemini: ${originalArticle.title}`);
 
         const prompt = `
             You are an expert SEO Content Strategist and Editor. Your goal is to take an original article and rewrite it using insights from two top-performing competitor articles discovered via Google Search.
@@ -42,13 +37,9 @@ const enrichArticle = async (originalArticle, references) => {
             REWRITTEN SEO-OPTIMIZED ARTICLE:
         `;
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo", // or gpt-4
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.7
-        });
-
-        let enrichedContent = response.choices[0].message.content.trim();
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        let enrichedContent = response.text().trim();
 
         // Safeguard: Ensure References section exists
         if (!enrichedContent.includes('## References')) {
@@ -58,7 +49,7 @@ const enrichArticle = async (originalArticle, references) => {
 
         return enrichedContent;
     } catch (error) {
-        console.error('Error enriching article with LLM:', error.message);
+        console.error('Error enriching article with Gemini:', error.message);
         return originalArticle.content; // Fallback to original
     }
 };

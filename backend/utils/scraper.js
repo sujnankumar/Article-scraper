@@ -32,9 +32,9 @@ const scrapeArticles = async () => {
             const $page = cheerio.load(pageData);
 
             const pageArticles = [];
-            $page('article, .ct-entry-inner').each((i, el) => {
-                const title = $page(el).find('h2.ct-entry-title a').text().trim();
-                const link = $page(el).find('h2.ct-entry-title a').attr('href');
+            $page('article').each((i, el) => {
+                const title = $page(el).find('h2.entry-title a').text().trim();
+                const link = $page(el).find('h2.entry-title a').attr('href');
 
                 if (title && link) {
                     pageArticles.push({ title, link });
