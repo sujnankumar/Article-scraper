@@ -15,45 +15,64 @@ const searchGoogle = async (query) => {
 
         const { data } = await axios.get(searchUrl, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            }
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5'
+            },
+            timeout: 10000
         });
 
         const $ = cheerio.load(data);
         const links = [];
 
-        $('.result__a').each((i, el) => {
-            let link = $(el).attr('href');
+        // Debug: Log how many elements we find with each selector
+        console.log(`Debug: .result__a found: ${$('.result__a').length}`);
+        console.log(`Debug: .result found: ${$('.result').length}`);
+        console.log(`Debug: a[href] found: ${$('a[href*="uddg"]').length}`);
 
-            // DuckDuckGo often uses redirect links, extract the actual URL from 'uddg' param
-            if (link && link.includes('uddg=')) {
-                try {
-                    const urlObj = new URL('https:' + link);
-                    link = urlObj.searchParams.get('uddg');
-                } catch (e) {
-                    // Fallback to regex if URL parsing fails
-                    const match = link.match(/uddg=([^&]+)/);
-                    if (match) link = decodeURIComponent(match[1]);
+        // Try multiple selectors
+        const selectors = ['.result__a', '.result a', 'a.result__url', 'a[href*="uddg"]'];
+
+        for (const selector of selectors) {
+            $(selector).each((i, el) => {
+                if (links.length >= 2) return false;
+
+                let link = $(el).attr('href');
+                if (!link) return;
+
+                // DuckDuckGo often uses redirect links, extract the actual URL from 'uddg' param
+                if (link.includes('uddg=')) {
+                    try {
+                        const fullUrl = link.startsWith('//') ? 'https:' + link : link;
+                        const urlObj = new URL(fullUrl);
+                        link = urlObj.searchParams.get('uddg');
+                    } catch (e) {
+                        const match = link.match(/uddg=([^&]+)/);
+                        if (match) link = decodeURIComponent(match[1]);
+                    }
                 }
-            }
 
-            if (link && link.startsWith('http')) {
-                // Heuristic to filter for blog/article-like URLs
-                const isInternal = link.includes('google.com') ||
-                    link.includes('duckduckgo.com') ||
-                    link.includes('beyondchats.com') || // Skip our own site
-                    link.includes('youtube.com') ||
-                    link.includes('facebook.com') ||
-                    link.includes('twitter.com') ||
-                    link.includes('instagram.com') ||
-                    link.includes('linkedin.com');
+                if (link && link.startsWith('http')) {
+                    const isBlacklisted =
+                        link.includes('google.com') ||
+                        link.includes('duckduckgo.com') ||
+                        link.includes('beyondchats.com') ||
+                        link.includes('youtube.com') ||
+                        link.includes('facebook.com') ||
+                        link.includes('twitter.com') ||
+                        link.includes('instagram.com') ||
+                        link.includes('linkedin.com') ||
+                        link.includes('wikipedia.org');
 
-                if (!isInternal && !links.includes(link)) {
-                    links.push(link);
+                    if (!isBlacklisted && !links.includes(link)) {
+                        console.log(`Found link: ${link}`);
+                        links.push(link);
+                    }
                 }
-            }
-            if (links.length >= 2) return false; // Break loop
-        });
+            });
+
+            if (links.length >= 2) break;
+        }
 
         console.log(`Found ${links.length} competitor links.`);
         return links;
