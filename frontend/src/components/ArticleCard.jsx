@@ -72,7 +72,7 @@ const ArticleCard = ({ article }) => {
             Read Full Original
           </a>
           <button className="view-btn" onClick={() => navigate(`/article/${article._id}`)}>
-            View Details
+            View Full
           </button>
         </div>
       </div>

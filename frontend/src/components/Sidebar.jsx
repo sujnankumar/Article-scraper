@@ -34,7 +34,7 @@ const Sidebar = () => {
       <nav className="nav-links">
         <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <LayoutDashboard size={20} />
-          {!isCollapsed && <span>Dashboard</span>}
+          {!isCollapsed && <span>Articles</span>}
         </NavLink>
         
         <NavLink to="/analytics" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>

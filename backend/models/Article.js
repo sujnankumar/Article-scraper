@@ -26,11 +26,9 @@ const ArticleSchema = new mongoose.Schema({
     isUpdated: {
         type: Boolean,
         default: false
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
     }
+}, {
+    timestamps: true // This automatically adds createdAt and updatedAt
 });
 
 module.exports = mongoose.model('Article', ArticleSchema);
