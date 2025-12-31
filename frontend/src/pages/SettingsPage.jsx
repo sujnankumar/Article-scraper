@@ -79,7 +79,7 @@ const SettingsPage = () => {
                     </div>
 
                     <div className="action-card">
-                        <h3>Run AI Analysis</h3>
+                        <h3>Enhance with AI</h3>
                         <p>Enriches pending articles with competitive intelligence.</p>
                         <button 
                             className="settings-btn primary"
@@ -87,7 +87,7 @@ const SettingsPage = () => {
                             disabled={isProcessing}
                         >
                             <RefreshCw size={18} className={isProcessing ? 'spin' : ''} />
-                            <span>{isProcessing ? 'Processing...' : 'Run Worker'}</span>
+                            <span>{isProcessing ? 'Enhancing...' : 'Enhance with AI'}</span>
                         </button>
                     </div>
                 </div>
