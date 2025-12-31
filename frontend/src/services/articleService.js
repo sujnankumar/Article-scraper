@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/articles';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_URL = `${API_BASE_URL}/api/articles`;
 
 export const getArticles = async () => {
     const response = await axios.get(API_URL);
@@ -12,9 +13,13 @@ export const getArticleById = async (id) => {
     return response.data;
 };
 
+export const getArticleStats = async () => {
+    const response = await axios.get(`${API_URL}/stats`);
+    return response.data;
+};
+
 export const triggerScraper = async () => {
-    // Calling the new endpoint we will create in the backend
-    const response = await axios.post('http://localhost:5000/api/process');
+    const response = await axios.post(`${API_BASE_URL}/api/process`);
     return response.data;
 };
 
