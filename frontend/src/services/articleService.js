@@ -11,3 +11,9 @@ export const getArticleById = async (id) => {
     const response = await axios.get(`${API_URL}/${id}`);
     return response.data;
 };
+
+export const triggerScraper = async () => {
+    // Calling the new endpoint we will create in the backend
+    const response = await axios.post('http://localhost:5000/api/process');
+    return response.data;
+};

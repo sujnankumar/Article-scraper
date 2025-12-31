@@ -18,6 +18,7 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/articles', require('./routes/articleRoutes'));
+app.use('/api', require('./routes/processRoutes'));
 
 const errorHandler = require('./middleware/error');
 app.use(errorHandler);

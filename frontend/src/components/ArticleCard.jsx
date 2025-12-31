@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import ArticleModal from './ArticleModal';
+import { useNavigate } from 'react-router-dom';
 
 const ArticleCard = ({ article }) => {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('updated'); // 'original' or 'updated'
-  const [showModal, setShowModal] = useState(false);
 
   // Helper to extract AI title from markdown if it exists
   const getProcessedContent = () => {
@@ -71,15 +71,11 @@ const ArticleCard = ({ article }) => {
           <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" className="source-link">
             Read Full Original
           </a>
-          <button className="view-btn" onClick={() => setShowModal(true)}>View Details</button>
+          <button className="view-btn" onClick={() => navigate(`/article/${article._id}`)}>
+            View Details
+          </button>
         </div>
       </div>
-
-      <ArticleModal 
-        article={article} 
-        isOpen={showModal} 
-        onClose={() => setShowModal(false)} 
-      />
     </>
   );
 };
