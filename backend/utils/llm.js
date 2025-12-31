@@ -9,7 +9,7 @@ const enrichArticle = async (originalArticle, references) => {
         }
 
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // updated model name for safety or keep as preview? Using 1.5-flash is safer/standard now.
+        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
         console.log(`Enriching article using Gemini: ${originalArticle.title}`);
 
@@ -41,6 +41,8 @@ const enrichArticle = async (originalArticle, references) => {
         const response = await result.response;
         let enrichedContent = response.text().trim();
 
+        console.log(`   ✓ Gemini responded with ${enrichedContent.length} characters`);
+
         // Safeguard: Ensure References section exists
         if (!enrichedContent.includes('## References')) {
             const referencesList = references.map(ref => `- [${ref.url}](${ref.url})`).join('\n');
@@ -49,7 +51,10 @@ const enrichArticle = async (originalArticle, references) => {
 
         return enrichedContent;
     } catch (error) {
-        console.error('Error enriching article with Gemini:', error.message);
+        console.error('❌ Error enriching article with Gemini:', error.message);
+        if (error.message.includes('API_KEY')) {
+            console.error('   GEMINI_API_KEY issue - check backend/.env file');
+        }
         return originalArticle.content; // Fallback to original
     }
 };

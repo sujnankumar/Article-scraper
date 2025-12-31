@@ -1,83 +1,76 @@
 const axios = require('axios');
-const cheerio = require('cheerio');
 
 /**
- * Searches DuckDuckGo HTML for a query and returns article links.
+ * Google Custom Search API Configuration
+ * Free tier: 100 queries/day
+ */
+const GOOGLE_API_KEY = process.env.GOOGLE_SEARCH_API_KEY || 'AIzaSyCOvbh6QxtodL4I1IMLoYEP6KHmU9kg91k';
+const SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID || '51d1386ef329a490b';
+
+/**
+ * Searches Google using the Custom Search API
  * @param {string} query - The search query (article title)
  * @returns {Promise<string[]>} - Array of top competitor URLs
  */
 const searchGoogle = async (query) => {
     try {
-        console.log(`Searching for competitors: "${query}"`);
+        console.log(`🔍 Searching Google API for: "${query}"`);
 
-        // Using DuckDuckGo HTML which is much more scraper-friendly than Google
-        const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query + " blog article")}`;
+        const apiUrl = 'https://www.googleapis.com/customsearch/v1';
 
-        const { data } = await axios.get(searchUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5'
+        const response = await axios.get(apiUrl, {
+            params: {
+                key: GOOGLE_API_KEY,
+                cx: SEARCH_ENGINE_ID,
+                q: `${query} blog article`,
+                num: 5  // Get 5 results
             },
             timeout: 10000
         });
 
-        const $ = cheerio.load(data);
+        const results = response.data.items || [];
+        console.log(`   API returned ${results.length} results`);
+
+        // Filter and extract URLs
         const links = [];
+        const blacklist = [
+            'youtube.com',
+            'facebook.com',
+            'twitter.com',
+            'instagram.com',
+            'linkedin.com',
+            'wikipedia.org',
+            'amazon.com',
+            'pinterest.com',
+            'beyondchats.com' // Skip our own site
+        ];
 
-        // Debug: Log how many elements we find with each selector
-        console.log(`Debug: .result__a found: ${$('.result__a').length}`);
-        console.log(`Debug: .result found: ${$('.result').length}`);
-        console.log(`Debug: a[href] found: ${$('a[href*="uddg"]').length}`);
-
-        // Try multiple selectors
-        const selectors = ['.result__a', '.result a', 'a.result__url', 'a[href*="uddg"]'];
-
-        for (const selector of selectors) {
-            $(selector).each((i, el) => {
-                if (links.length >= 2) return false;
-
-                let link = $(el).attr('href');
-                if (!link) return;
-
-                // DuckDuckGo often uses redirect links, extract the actual URL from 'uddg' param
-                if (link.includes('uddg=')) {
-                    try {
-                        const fullUrl = link.startsWith('//') ? 'https:' + link : link;
-                        const urlObj = new URL(fullUrl);
-                        link = urlObj.searchParams.get('uddg');
-                    } catch (e) {
-                        const match = link.match(/uddg=([^&]+)/);
-                        if (match) link = decodeURIComponent(match[1]);
-                    }
-                }
-
-                if (link && link.startsWith('http')) {
-                    const isBlacklisted =
-                        link.includes('google.com') ||
-                        link.includes('duckduckgo.com') ||
-                        link.includes('beyondchats.com') ||
-                        link.includes('youtube.com') ||
-                        link.includes('facebook.com') ||
-                        link.includes('twitter.com') ||
-                        link.includes('instagram.com') ||
-                        link.includes('linkedin.com') ||
-                        link.includes('wikipedia.org');
-
-                    if (!isBlacklisted && !links.includes(link)) {
-                        console.log(`Found link: ${link}`);
-                        links.push(link);
-                    }
-                }
-            });
-
+        for (const item of results) {
             if (links.length >= 2) break;
+
+            const url = item.link;
+            const isBlacklisted = blacklist.some(blocked => url.includes(blocked));
+
+            if (!isBlacklisted) {
+                console.log(`   ✓ Found: ${url.substring(0, 60)}...`);
+                links.push(url);
+            }
         }
 
-        console.log(`Found ${links.length} competitor links.`);
+        console.log(`   Returning ${links.length} competitor URLs`);
         return links;
+
     } catch (error) {
-        console.error('Error during search:', error.message);
+        if (error.response) {
+            console.error(`❌ Google API Error: ${error.response.status} - ${error.response.data?.error?.message || 'Unknown'}`);
+
+            // Check for quota exceeded
+            if (error.response.status === 429 || error.response.data?.error?.code === 429) {
+                console.error('   ⚠️ Daily quota exceeded (100 queries/day on free tier)');
+            }
+        } else {
+            console.error('❌ Search error:', error.message);
+        }
         return [];
     }
 };

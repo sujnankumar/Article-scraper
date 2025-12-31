@@ -24,11 +24,22 @@ const SettingsPage = () => {
     const handleRunScraper = async () => {
       try {
         setIsProcessing(true);
-        await triggerScraper();
-        showModal('Processing Started', 'The AI Worker is now running in the background. Check your server logs for progress.', 'success');
+        const response = await triggerScraper();
+        const data = response.data || response;
+        
+        if (data.success) {
+          const results = data.data || {};
+          showModal(
+            'Enhancement Complete', 
+            `${results.enhanced || 0} articles enhanced, ${results.skipped || 0} skipped.`, 
+            'success'
+          );
+        } else {
+          showModal('Enhancement Failed', data.message || 'Unknown error occurred.', 'error');
+        }
       } catch (error) {
         console.error(error);
-        showModal('Processing Failed', 'Could not start the AI worker. Please check if the backend is running.', 'error');
+        showModal('Enhancement Failed', 'Could not complete enhancement. Check if the backend is running.', 'error');
       } finally {
         setIsProcessing(false);
       }
