@@ -4,8 +4,8 @@ const axios = require('axios');
  * Google Custom Search API Configuration
  * Free tier: 100 queries/day
  */
-const GOOGLE_API_KEY = process.env.GOOGLE_SEARCH_API_KEY || 'AIzaSyCOvbh6QxtodL4I1IMLoYEP6KHmU9kg91k';
-const SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID || '51d1386ef329a490b';
+const GOOGLE_API_KEY = process.env.GOOGLE_SEARCH_API_KEY ;
+const SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID ;
 
 /**
  * Searches Google using the Custom Search API
